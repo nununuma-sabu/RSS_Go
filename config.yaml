@@ -1,3 +1,7 @@
 feeds:
   - url: "https://yamadashy.github.io/tech-blog-rss-feed/feeds/rss.xml"
     category: "tech"
+  - url: "https://rss.arxiv.org/rss/cs.CV"
+    category: "tech"
+  - url: "https://rss.arxiv.org/rss/eess.IV"
+    category: "tech"
