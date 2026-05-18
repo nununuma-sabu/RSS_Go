@@ -64,6 +64,11 @@ func main() {
 	}
 	defer summaryFile.Close()
 
+	info, err := summaryFile.Stat()
+	if err == nil && info.Size() == 0 {
+		summaryFile.WriteString(fmt.Sprintf("# %s の新着記事サマリー\n\n", today))
+	}
+
 	// 5. Fetch feeds and summarize
 	for _, feedConfig := range cfg.Feeds {
 		log.Printf("Fetching feed: %s (%s)", feedConfig.URL, feedConfig.Category)
@@ -126,6 +131,7 @@ func main() {
 		}
 	} else {
 		log.Println("No new items to save.")
+		summaryFile.WriteString("本日の新着記事はありませんでした。\n\n")
 	}
 	
 	log.Println("RSS fetching and summarization completed.")
