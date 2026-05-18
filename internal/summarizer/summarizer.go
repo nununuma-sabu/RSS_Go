@@ -30,8 +30,8 @@ func (s *Summarizer) Close() {
 
 // Summarize sends the text to gemini-1.5-pro for summarization
 func (s *Summarizer) Summarize(ctx context.Context, text string) (string, error) {
-	// gemini-1.5-pro-latest specifies the use of the highest accuracy model
-	model := s.client.GenerativeModel("gemini-1.5-pro-latest")
+	// Use gemini-2.5-pro for high accuracy summarization
+	model := s.client.GenerativeModel("gemini-2.5-pro")
 	model.SetTemperature(0.3) // Lower temperature for more factual summarization
 
 	prompt := fmt.Sprintf(`以下のRSS記事の内容（タイトルと概要、または本文）を元に、内容を3行（200文字程度）の日本語で簡潔に要約してください。
