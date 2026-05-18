@@ -50,10 +50,17 @@ func main() {
 
 	var newItems []*gofeed.Item
 
-	// Open summary.md to append results
-	summaryFile, err := os.OpenFile("summary.md", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	// Ensure summaries directory exists
+	if err := os.MkdirAll("summaries", 0755); err != nil {
+		log.Fatalf("Error creating summaries directory: %v", err)
+	}
+
+	// Prepare output file (e.g. summaries/2026-05-18.md)
+	today := time.Now().Format("2006-01-02")
+	summaryFilename := fmt.Sprintf("summaries/%s.md", today)
+	summaryFile, err := os.OpenFile(summaryFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatalf("Error opening summary.md: %v", err)
+		log.Fatalf("Error opening summary output file: %v", err)
 	}
 	defer summaryFile.Close()
 
