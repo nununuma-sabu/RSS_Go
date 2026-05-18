@@ -12,6 +12,7 @@ import (
 	"github.com/nununuma-sabu/RSS_Go/internal/rss"
 	"github.com/nununuma-sabu/RSS_Go/internal/storage"
 	"github.com/nununuma-sabu/RSS_Go/internal/summarizer"
+	"github.com/nununuma-sabu/RSS_Go/internal/slack"
 )
 
 func main() {
@@ -21,6 +22,15 @@ func main() {
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	if apiKey == "" {
 		log.Fatalf("Error: GEMINI_API_KEY environment variable is not set. Please provide it to run the summarizer.")
+	}
+
+	// Get Slack Webhook URL (Optional, but recommended)
+	slackURL := os.Getenv("SLACK_WEBHOOK_URL")
+	var slackClient *slack.Client
+	if slackURL == "" {
+		log.Println("Warning: SLACK_WEBHOOK_URL is not set. Slack notifications will be skipped.")
+	} else {
+		slackClient = slack.NewClient(slackURL)
 	}
 
 	// 1. Load config
@@ -117,9 +127,19 @@ func main() {
 			timestamp := time.Now().Format("2006/01/02 15:04:05")
 			entry := fmt.Sprintf("## [%s] %s\n- **Date:** %s\n- **Link:** %s\n\n### 要約\n%s\n\n---\n", feedConfig.Category, item.Title, timestamp, item.Link, summary)
 			if _, err := summaryFile.WriteString(entry); err != nil {
-				log.Printf("    Error writing to summary.md: %v", err)
+				log.Printf("    Error writing to summary output file: %v", err)
 			}
-			log.Printf("    -> Summarized and saved to summary.md")
+			log.Printf("    -> Summarized and saved to summary output file")
+
+			// Send to Slack
+			if slackClient != nil {
+				slackMsg := fmt.Sprintf("*[%s]* <%s|%s>\n%s", feedConfig.Category, item.Link, item.Title, summary)
+				if err := slackClient.Send(ctx, slackMsg); err != nil {
+					log.Printf("    Error sending to Slack: %v", err)
+				} else {
+					log.Printf("    -> Sent notification to Slack")
+				}
+			}
 		}
 	}
 
