@@ -7,19 +7,19 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-// Fetcher encapsulates RSS fetching logic
+// Fetcher はRSS取得のロジックをカプセル化します
 type Fetcher struct {
 	fp *gofeed.Parser
 }
 
-// NewFetcher creates a new RSS fetcher
+// NewFetcher は新しいRSSフェッチャーを作成します
 func NewFetcher() *Fetcher {
 	return &Fetcher{
 		fp: gofeed.NewParser(),
 	}
 }
 
-// Fetch retrieves and parses an RSS feed from the given URL
+// Fetch は指定されたURLからRSSフィードを取得して解析します
 func (f *Fetcher) Fetch(ctx context.Context, url string) (*gofeed.Feed, error) {
 	feed, err := f.fp.ParseURLWithContext(url, ctx)
 	if err != nil {

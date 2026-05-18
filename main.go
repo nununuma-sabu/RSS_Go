@@ -18,13 +18,13 @@ import (
 func main() {
 	log.Println("Starting RSS fetcher and summarizer...")
 
-	// Get API Key (Fail fast if not set)
+	// APIキーを取得する（設定されていない場合は即座に終了する）
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	if apiKey == "" {
 		log.Fatalf("Error: GEMINI_API_KEY environment variable is not set. Please provide it to run the summarizer.")
 	}
 
-	// Get Slack Webhook URL (Optional, but recommended)
+	// SlackのWebhook URLを取得する（任意ですが推奨）
 	slackURL := os.Getenv("SLACK_WEBHOOK_URL")
 	var slackClient *slack.Client
 	if slackURL == "" {
@@ -33,22 +33,22 @@ func main() {
 		slackClient = slack.NewClient(slackURL)
 	}
 
-	// 1. Load config
+	// 1. 設定ファイルの読み込み
 	cfg, err := config.LoadConfig("config.yaml")
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
 
-	// 2. Initialize storage
+	// 2. ストレージの初期化
 	store, err := storage.NewStorage("fetched_articles.json")
 	if err != nil {
 		log.Fatalf("Error loading storage: %v", err)
 	}
 
-	// 3. Initialize fetcher
+	// 3. フェッチャーの初期化
 	fetcher := rss.NewFetcher()
 
-	// 4. Initialize summarizer
+	// 4. 要約器（Summarizer）の初期化
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 	defer cancel()
 
@@ -60,12 +60,12 @@ func main() {
 
 	var newItems []*gofeed.Item
 
-	// Ensure summaries directory exists
+	// summariesディレクトリが存在することを確認する
 	if err := os.MkdirAll("summaries", 0755); err != nil {
 		log.Fatalf("Error creating summaries directory: %v", err)
 	}
 
-	// Prepare output file (e.g. summaries/2026-05-18.md)
+	// 出力ファイルを準備する（例：summaries/2026-05-18.md）
 	today := time.Now().Format("2006-01-02")
 	summaryFilename := fmt.Sprintf("summaries/%s.md", today)
 	summaryFile, err := os.OpenFile(summaryFilename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -79,7 +79,7 @@ func main() {
 		summaryFile.WriteString(fmt.Sprintf("# %s の新着記事サマリー\n\n", today))
 	}
 
-	// 5. Fetch feeds and summarize
+	// 5. フィードを取得し、要約する
 	for _, feedConfig := range cfg.Feeds {
 		log.Printf("Fetching feed: %s (%s)", feedConfig.URL, feedConfig.Category)
 		
@@ -92,7 +92,7 @@ func main() {
 		log.Printf("Successfully fetched: %s", feed.Title)
 		log.Printf("Found %d total items", len(feed.Items))
 
-		// Filter new items
+		// 新着記事のみをフィルタリングする
 		var feedNewItems []*gofeed.Item
 		for _, item := range feed.Items {
 			if !store.IsFetched(item.Link) {
@@ -104,7 +104,7 @@ func main() {
 		
 		log.Printf("Found %d NEW items", len(feedNewItems))
 
-		// Summarize up to 3 items per feed to avoid rate limits / high latency
+		// レート制限と遅延を避けるため、1つのフィードにつき最大3件まで要約する
 		limit := 3
 		if len(feedNewItems) < limit {
 			limit = len(feedNewItems)
@@ -114,7 +114,7 @@ func main() {
 			item := feedNewItems[i]
 			log.Printf("  - Summarizing: [%s] %s", feedConfig.Category, item.Title)
 
-			// Prepare text
+			// 要約用のテキストを準備する
 			contentToSummarize := fmt.Sprintf("Title: %s\nLink: %s\nDescription: %s", item.Title, item.Link, item.Description)
 			
 			summary, err := sumz.Summarize(ctx, contentToSummarize)
@@ -123,7 +123,7 @@ func main() {
 				continue
 			}
 
-			// Write result to summary.md
+			// 結果を出力ファイルに書き込む
 			timestamp := time.Now().Format("2006/01/02 15:04:05")
 			entry := fmt.Sprintf("## [%s] %s\n- **Date:** %s\n- **Link:** %s\n\n### 要約\n%s\n\n---\n", feedConfig.Category, item.Title, timestamp, item.Link, summary)
 			if _, err := summaryFile.WriteString(entry); err != nil {
@@ -131,7 +131,7 @@ func main() {
 			}
 			log.Printf("    -> Summarized and saved to summary output file")
 
-			// Send to Slack
+			// Slackへ送信する
 			if slackClient != nil {
 				slackMsg := fmt.Sprintf("*[%s]* <%s|%s>\n%s", feedConfig.Category, item.Link, item.Title, summary)
 				if err := slackClient.Send(ctx, slackMsg); err != nil {
@@ -143,7 +143,7 @@ func main() {
 		}
 	}
 
-	// 6. Save state
+	// 6. 状態を保存する
 	if len(newItems) > 0 {
 		log.Printf("Saving state... Added %d new items.", len(newItems))
 		if err := store.Save(); err != nil {

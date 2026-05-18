@@ -9,24 +9,24 @@ import (
 	"time"
 )
 
-// Client handles sending messages to Slack via Incoming Webhook
+// Client はIncoming Webhook経由でSlackへメッセージを送信する処理を担います
 type Client struct {
 	webhookURL string
 }
 
-// NewClient creates a new Slack client
+// NewClient は新しいSlackクライアントを作成します
 func NewClient(webhookURL string) *Client {
 	return &Client{
 		webhookURL: webhookURL,
 	}
 }
 
-// payload represents the JSON payload for Slack
+// payload はSlackへ送信するJSONペイロードを表します
 type payload struct {
 	Text string `json:"text"`
 }
 
-// Send sends a text message to Slack
+// Send はテキストメッセージをSlackへ送信します
 func (c *Client) Send(ctx context.Context, text string) error {
 	if c.webhookURL == "" {
 		return fmt.Errorf("slack webhook url is empty")
