@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.20' # go.modのバージョンに合わせて調整可能
+          go-version: '1.26.x' # go.modのバージョンに合わせる
 
       - name: Run RSS Fetcher and Summarizer
         env:
