@@ -35,6 +35,7 @@ func (s *Summarizer) Summarize(ctx context.Context, text string) (string, error)
 	model.SetTemperature(0.3) // Lower temperature for more factual summarization
 
 	prompt := fmt.Sprintf(`以下のRSS記事の内容（タイトルと概要、または本文）を元に、内容を3行（200文字程度）の日本語で簡潔に要約してください。
+重要: 「はい、承知いたしました」などの挨拶や前置き、補足の文章は一切出力せず、要約文（3行）のみを直接出力してください。
 
 ---
 %s
