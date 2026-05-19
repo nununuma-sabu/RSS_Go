@@ -104,8 +104,8 @@ func main() {
 		
 		log.Printf("Found %d NEW items", len(feedNewItems))
 
-		// 1つのフィードにつき最大10件まで要約する
-		limit := 10
+		// 1つのフィードにつき最大5件まで要約する
+		limit := 5
 		if len(feedNewItems) < limit {
 			limit = len(feedNewItems)
 		}
