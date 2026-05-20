@@ -5,6 +5,8 @@ GitHub Actionsを利用することで、完全無料かつサーバーレスで
 
 ## システム構成・フロー
 
+![システム構成図](system_architecture.png)
+
 1. **GitHub Actions（定期実行）**: 毎日指定時間（デフォルトは日本時間 深夜0:00）に起動
 2. **Goバッチ処理**: `config.yaml` に定義されたRSSリストをパースして記事を取得
 3. **重複排除**: `fetched_articles.json` を参照し、未読の新着記事のみを抽出
