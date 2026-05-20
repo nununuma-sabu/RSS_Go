@@ -5,7 +5,7 @@ GitHub Actionsを利用することで、完全無料かつサーバーレスで
 
 ## システム構成・フロー
 
-![システム構成図](system_architecture.png)
+![システム構成図](slack.png)
 
 1. **GitHub Actions（定期実行）**: 毎日指定時間（デフォルトは日本時間 深夜0:00）に起動
 2. **Goバッチ処理**: `config.yaml` に定義されたRSSリストをパースして記事を取得
