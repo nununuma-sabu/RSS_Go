@@ -2,8 +2,8 @@ name: RSS Batch and Summarizer
 
 on:
   schedule:
-    # 平日のみ（月曜〜金曜）日本時間の深夜 0:00 に実行 (UTC 15:00)
-    - cron: '0 15 * * MON-FRI'
+    # 毎週水曜日のみ日本時間の深夜 0:00 に実行 (UTC 火曜 15:00)
+    - cron: '0 15 * * TUE'
   workflow_dispatch: # 手動実行用
 
 jobs:
